@@ -20,8 +20,9 @@ import hexy
 
 from htm.bindings.sdr import SDR
 from htm.bindings.math import Random
+from htm.bindings.encoder import BaseEncoder
 
-class GridCellEncoder:
+class GridCellEncoder(BaseEncoder):
     """
     This Encoder converts a 2-D coordinate into plausible grid cell activity.
     The output SDR is divided into modules.  Each module is a distinct groups of
@@ -50,8 +51,8 @@ class GridCellEncoder:
         encoder uses.  This encoder produces deterministic output.  The seed
         zero is special, seed zero is replaced with a truly random seed.
         """
-        self.size       = size
-        self.dimensions = (size,)
+        super().__init__((size,))
+        
         self.sparsity   = sparsity
         self.periods    = tuple(sorted(float(p) for p in periods))
         assert(len(self.periods) > 0)
@@ -60,14 +61,14 @@ class GridCellEncoder:
         assert(self.sparsity <= 1)
 
         # Assign each module a range of cells in the output SDR.
-        partitions       = np.linspace(0, self.size, num=len(self.periods) + 1)
+        partitions       = np.linspace(0, super().size, num=len(self.periods) + 1)
         partitions       = list(zip(partitions, partitions[1:]))
         self.partitions_ = [(int(round(start)), int(round(stop)))
                                         for start, stop in partitions]
 
         # Assign each module a random offset and orientation.
         rng            = np.random.RandomState(seed = Random(seed).getUInt32())
-        self.offsets_  = rng.uniform(0, max(self.periods)*9, size=(self.size, 2))
+        self.offsets_  = rng.uniform(0, max(self.periods)*9, size=(super().size, 2))
         self.angles_   = []
         self.rot_mats_ = []
         for period in self.periods:
@@ -95,10 +96,10 @@ class GridCellEncoder:
         location = list(location)
         assert(len(location) == 2)
         if grid_cells is None:
-            grid_cells = SDR((self.size,))
+            grid_cells = SDR(super().dimensions)
         else:
             assert(isinstance(grid_cells, SDR))
-            assert(grid_cells.dimensions == [self.size])
+            assert(grid_cells.dimensions == [super().size])
         if any(math.isnan(x) for x in location):
             grid_cells.zero()
             return grid_cells

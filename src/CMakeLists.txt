@@ -91,6 +91,8 @@ set(encoders_files
     htm/encoders/RandomDistributedScalarEncoder.cpp
     htm/encoders/SimHashDocumentEncoder.hpp
     htm/encoders/SimHashDocumentEncoder.cpp
+    htm/encoders/CoordinateEncoder.hpp
+    htm/encoders/CoordinateEncoder.cpp
 )
     
 set(engine_files
